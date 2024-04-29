@@ -20,8 +20,6 @@ package cn.felord.payment.wechat.v3.model.ecommerce;
 import cn.felord.payment.wechat.enumeration.IdDocType;
 import lombok.Data;
 
-import java.time.LocalDate;
-
 @Data
 public class EcommerceContactInfo {
 	private String contactType;
@@ -30,9 +28,9 @@ public class EcommerceContactInfo {
 	private String contactIdCardNumber;
 	private String contactIdDocCopy;
 	private String contactIdDocCopyBack;
-	private LocalDate contactIdDocPeriodBegin;
 	private String contactIdDocPeriodEnd;
 	private String businessAuthorizationLetter;
+	private String contactIdDocPeriodBegin;
 	private String mobilePhone;
 	private String contactEmail;
 }
