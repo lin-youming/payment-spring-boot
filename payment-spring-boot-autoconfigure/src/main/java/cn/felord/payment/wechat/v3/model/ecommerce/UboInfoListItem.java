@@ -17,20 +17,19 @@
 
 package cn.felord.payment.wechat.v3.model.ecommerce;
 
-import cn.felord.payment.wechat.enumeration.BusinessCertType;
+import cn.felord.payment.wechat.enumeration.IdDocType;
 import lombok.Data;
 
-/**
- * @author felord.cn
- * @since 1.0.14.RELEASE
- */
+import java.time.LocalDate;
+
 @Data
-public class EcommerceBusinessLicenseInfo {
-    private BusinessCertType certType;
-    private String businessLicenseCopy;
-    private String businessLicenseNumber;
-    private String merchantName;
-    private String legalPerson;
-    private String companyAddress;
-    private String businessTime;
+public class UboInfoListItem {
+	private IdDocType uboIdDocType;
+	private String uboIdDocCopy;
+	private String uboIdDocCopyBack;
+	private String uboIdDocName;
+	private String uboIdDocNumber;
+	private String uboIdDocAddress;
+	private LocalDate uboIdDocPeriodBegin;
+	private String uboIdDocPeriodEnd;
 }

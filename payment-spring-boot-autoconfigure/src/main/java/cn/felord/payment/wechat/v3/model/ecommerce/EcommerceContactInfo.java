@@ -28,9 +28,9 @@ public class EcommerceContactInfo {
 	private String contactIdCardNumber;
 	private String contactIdDocCopy;
 	private String contactIdDocCopyBack;
-	private String contactIdDocPeriodBegin;
 	private String contactIdDocPeriodEnd;
 	private String businessAuthorizationLetter;
+	private String contactIdDocPeriodBegin;
 	private String mobilePhone;
 	private String contactEmail;
 }

@@ -61,6 +61,11 @@ public class CreateBatchTransferParams {
      * 指定该笔转账使用的转账场景ID
      */
     private String transferSceneId;
+    /**
+     * 回调通知
+     * @since 1.0.20
+     */
+    private String notifyUrl;
 
     /**
      * 转账明细.
