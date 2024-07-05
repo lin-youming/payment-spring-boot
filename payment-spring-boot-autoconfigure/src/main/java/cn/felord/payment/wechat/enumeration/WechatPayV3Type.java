@@ -704,7 +704,7 @@ public enum WechatPayV3Type {
      *
      * @since 1.0.11.RELEASE
      */
-    PROFITSHARING_RETURN_ORDERS_RESULT(HttpMethod.GET, "%s/v3/profitsharing/return-orders"),
+    PROFITSHARING_RETURN_ORDERS_RESULT(HttpMethod.GET, "%s/v3/profitsharing/return-orders/{out_return_no}"),
     /**
      * 解冻剩余资金API.
      *
