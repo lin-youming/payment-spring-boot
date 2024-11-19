@@ -80,4 +80,9 @@ public class WechatMetaContainer {
                 .map(WechatMetaBean::getTenantId)
                 .collect(Collectors.toSet());
     }
+
+    public WechatMetaBean removeWechatMeta(String tenantId) {
+//        this.tenantIds.remove(tenantId);
+        return this.wechatMetaBeanMap.remove(tenantId);
+    }
 }
