@@ -504,7 +504,7 @@ public class WechatPayCallback {
      * @since 1.0.2.RELEASE
      */
     private CallbackParams resolve(ResponseSignVerifyParams params) throws JsonProcessingException {
-        if (signatureProvider.responseSignVerify(params)) {
+        if (signatureProvider.responseSignVerify(params, tenantId)) {
             return MAPPER.readValue(params.getBody(), CallbackParams.class);
         }
         throw new PayException("invalid wechat pay callback");

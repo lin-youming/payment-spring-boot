@@ -22,11 +22,11 @@
     <parent>
         <groupId>cn.felord</groupId>
         <artifactId>payment-spring-boot</artifactId>
-        <version>1.0.20.RELEASE</version>
+        <version>0.0.99</version>
     </parent>
 
     <artifactId>payment-spring-boot-autoconfigure</artifactId>
-    <version>1.0.20.RELEASE</version>
+    <version>0.0.99</version>
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
@@ -83,12 +83,38 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.70</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.70</version> <!-- 请根据需要选择最新版本 -->
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version> <!-- 请确保使用的是最新版本 -->
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

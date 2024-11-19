@@ -18,6 +18,7 @@ package cn.felord.payment.wechat.v3;
 
 
 import cn.felord.payment.PayException;
+import cn.felord.payment.wechat.WechatPayProperties;
 import cn.felord.payment.wechat.enumeration.WeChatServer;
 import cn.felord.payment.wechat.enumeration.WechatPayV3Type;
 import cn.felord.payment.wechat.v3.model.ResponseSignVerifyParams;
@@ -50,6 +51,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -170,7 +172,48 @@ public class SignatureProvider {
      * @param params the params
      * @return the boolean
      */
-    public boolean responseSignVerify(ResponseSignVerifyParams params) {
+    public boolean responseSignVerify(ResponseSignVerifyParams params, String tenantId) {
+
+        WechatMetaBean wechatMeta = wechatMetaContainer.getWechatMeta(tenantId);
+        WechatPayProperties.V3 v3 = wechatMeta.getV3();
+        Integer type = v3.getType();
+        if (type == 2) {
+            //类型为2 属于公钥模式
+
+            try {
+                String publicKeyStr = v3.getPublicKey();
+
+                // 去除头部
+                String noHeader = publicKeyStr.trim().replaceFirst("-----BEGIN PUBLIC KEY-----\\n?", "");
+                // 去除尾部
+                String cleanKey = noHeader.replaceAll("\\n?-----END PUBLIC KEY-----$", "");
+
+                // 解码公钥
+                byte[] keyBytes = Base64.getDecoder().decode(cleanKey.replaceAll(" ", ""));
+                X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+                // 验签过程
+                Signature sig = Signature.getInstance("SHA256withRSA");
+                sig.initVerify(publicKey);
+
+                String timestamp = params.getWechatpayTimestamp();
+                String nonce = params.getWechatpayNonce();
+                String body = params.getBody();
+                String message = timestamp + "\n" + nonce + "\n" + body + "\n";
+
+                sig.update(message.getBytes(StandardCharsets.UTF_8));
+
+                // 解码签名并验证
+                byte[] signatureBytes = Base64.getDecoder().decode(params.getWechatpaySignature());
+                return sig.verify(signatureBytes);
+
+            } catch (Exception e) {
+                log.error("验签失败:{}", e.getMessage(), e);
+                return false;
+            }
+        }
 
         String wechatpaySerial = params.getWechatpaySerial();
         X509WechatCertificateInfo certificate = CERTIFICATE_SET.stream()
@@ -203,6 +246,14 @@ public class SignatureProvider {
      */
     @SneakyThrows
     private synchronized void refreshCertificate(String tenantId) {
+        WechatMetaBean wechatMeta = wechatMetaContainer.getWechatMeta(tenantId);
+        WechatPayProperties.V3 v3 = wechatMeta.getV3();
+        Integer type = v3.getType();
+        if (type == 2) {
+            //类型为2 属于公钥模式
+            return;
+        }
+
         String url = WechatPayV3Type.CERT.uri(WeChatServer.CHINA);
 
         UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
@@ -255,6 +306,67 @@ public class SignatureProvider {
                     throw new PayException("An error occurred while generating the wechat v3 certificate, reason : " + e.getMessage());
                 }
             });
+        }
+    }
+
+
+    @SneakyThrows
+    public synchronized void addTenant(String tenantId) {
+        WechatMetaBean wechatMeta = wechatMetaContainer.getWechatMeta(tenantId);
+        WechatPayProperties.V3 v3 = wechatMeta.getV3();
+        Integer type = v3.getType();
+        if (type == 2) {
+            //类型为2 属于公钥模式
+            return;
+        }
+
+        String url = WechatPayV3Type.CERT.uri(WeChatServer.CHINA);
+        UriComponents uri = UriComponentsBuilder.fromHttpUrl(url).build();
+        String canonicalUrl = uri.getPath();
+        String encodedQuery = uri.getQuery();
+        if (encodedQuery != null) {
+            canonicalUrl = canonicalUrl + "?" + encodedQuery;
+        }
+
+        HttpMethod httpMethod = WechatPayV3Type.CERT.method();
+        String authorization = this.requestSign(tenantId, httpMethod.name(), canonicalUrl, "");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", authorization);
+        headers.add("User-Agent", "X-Pay-Service");
+        RequestEntity<?> requestEntity = new RequestEntity<>(headers, httpMethod, uri.toUri());
+        ResponseEntity<ObjectNode> responseEntity = this.restOperations.exchange(requestEntity, ObjectNode.class);
+        ObjectNode bodyObjectNode = responseEntity.getBody();
+        if (Objects.isNull(bodyObjectNode)) {
+            throw new PayException("cant obtain the response body");
+        } else {
+            ArrayNode certificates = bodyObjectNode.withArray("data");
+            if (certificates.isArray() && !certificates.isEmpty()) {
+                CertificateFactory certificateFactory = CertificateFactory.getInstance("X509", "BC");
+                certificates.forEach((objectNode) -> {
+                    JsonNode encryptCertificate = objectNode.get("encrypt_certificate");
+                    String associatedData = encryptCertificate.get("associated_data").asText();
+                    String nonce = encryptCertificate.get("nonce").asText();
+                    String ciphertext = encryptCertificate.get("ciphertext").asText();
+                    String publicKey = this.decryptResponseBody(tenantId, associatedData, nonce, ciphertext);
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(publicKey.getBytes(StandardCharsets.UTF_8));
+
+                    Certificate certificate;
+                    try {
+                        certificate = certificateFactory.generateCertificate(inputStream);
+                    } catch (CertificateException e) {
+                        throw new RuntimeException(e);
+                    }
+                    String responseSerialNo = objectNode.get("serial_no").asText();
+                    X509WechatCertificateInfo x509WechatCertificateInfo = new X509WechatCertificateInfo();
+                    x509WechatCertificateInfo.setWechatPaySerial(responseSerialNo);
+                    x509WechatCertificateInfo.setTenantId(tenantId);
+                    x509WechatCertificateInfo.setX509Certificate((X509Certificate) certificate);
+                    CERTIFICATE_SET.add(x509WechatCertificateInfo);
+
+                });
+            }
         }
     }
 

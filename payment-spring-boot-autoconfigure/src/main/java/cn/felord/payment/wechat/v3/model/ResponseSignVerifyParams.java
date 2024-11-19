@@ -23,7 +23,7 @@ import lombok.Data;
  * 微信的响应签名校验参数
  *
  * @author felord.cn
- * @see SignatureProvider#responseSignVerify(ResponseSignVerifyParams) SignatureProvider#responseSignVerify(ResponseSignVerifyParams)SignatureProvider#responseSignVerify(ResponseSignVerifyParams)
+// * @see SignatureProvider#responseSignVerify(ResponseSignVerifyParams) SignatureProvider#responseSignVerify(ResponseSignVerifyParams)SignatureProvider#responseSignVerify(ResponseSignVerifyParams)
  * @since 1.0.0.RELEASE
  */
 @Data

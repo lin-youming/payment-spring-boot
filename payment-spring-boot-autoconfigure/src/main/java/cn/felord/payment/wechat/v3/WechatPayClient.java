@@ -235,7 +235,7 @@ public class WechatPayClient {
             httpHeaders.add("Authorization", authorization);
             httpHeaders.add("User-Agent", "X-Pay-Service");
             httpHeaders.remove("Meta-Info");
-            httpHeaders.remove("Pay-TenantId");
+//            httpHeaders.remove("Pay-TenantId");
             return requestEntity.headers(httpHeaders);
 
         }
@@ -248,6 +248,9 @@ public class WechatPayClient {
          * @param requestEntity the request entity
          */
         private <T> void doExecute(WechatRequestEntity<T> requestEntity) {
+            //为了拿到tenantId
+            HttpHeaders requestEntityHeaders = requestEntity.getHeaders();
+            String tenantId = Objects.requireNonNull(requestEntityHeaders.get("Pay-TenantId")).get(0);
 
             ResponseEntity<ObjectNode> responseEntity = restOperations.exchange(requestEntity, ObjectNode.class);
             HttpHeaders headers = responseEntity.getHeaders();
@@ -274,7 +277,7 @@ public class WechatPayClient {
             params.setBody(content);
 
             // 验证微信服务器签名
-            if (signatureProvider.responseSignVerify(params)) {
+            if (signatureProvider.responseSignVerify(params, tenantId)) {
                 Consumer<ResponseEntity<ObjectNode>> responseConsumer = requestEntity.getResponseBodyConsumer();
                 if (Objects.nonNull(responseConsumer)) {
                     // 验证通过消费

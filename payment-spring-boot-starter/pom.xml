@@ -22,11 +22,11 @@
     <parent>
         <groupId>cn.felord</groupId>
         <artifactId>payment-spring-boot</artifactId>
-        <version>1.0.20.RELEASE</version>
+        <version>0.0.99</version>
     </parent>
 
     <artifactId>payment-spring-boot-starter</artifactId>
-    <version>1.0.20.RELEASE</version>
+    <version>0.0.99</version>
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
@@ -62,4 +62,21 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version> <!-- 请确保使用的是最新版本 -->
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

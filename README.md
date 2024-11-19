@@ -45,7 +45,7 @@ Starter，支持微信优惠券，代金券、商家券、智慧商圈、商家�
 <dependency>
     <groupId>cn.felord</groupId>
     <artifactId>payment-spring-boot-starter</artifactId>
-    <version>1.0.20.RELEASE</version>
+    <version>0.0.99</version>
 </dependency>
 ```
 

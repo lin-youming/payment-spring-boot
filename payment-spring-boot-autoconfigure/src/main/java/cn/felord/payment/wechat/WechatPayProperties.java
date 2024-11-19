@@ -65,16 +65,27 @@ public class WechatPayProperties {
          */
         private String partnerKey;
         /**
-         * wechat pay certificate Path
+         * 商户证书公钥
          */
-        private String certPath;
+        private String certificate;
         /**
-         * wechat pay absolute certificate Path
+         * 商户证书私钥
          */
-        private String certAbsolutePath;
+        private String privateKey;
         /**
          * your pay server domain
          */
         private String domain;
+
+        /**
+         * 1.证书模式
+         * 2.公钥模式
+         */
+        private Integer type;
+
+        /**
+         * 新公钥
+         */
+        private String publicKey;
     }
 }

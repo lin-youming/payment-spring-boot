@@ -43,7 +43,7 @@ public class WechatTenantServiceConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public WechatTenantService wechatTenantService(WechatPayProperties wechatPayProperties, ResourceLoader resourceLoader) {
-        return new InMemoryWechatTenantService(wechatPayProperties, resourceLoader);
+    public WechatTenantService wechatTenantService(WechatPayProperties wechatPayProperties) {
+        return new InMemoryWechatTenantService(wechatPayProperties);
     }
 }

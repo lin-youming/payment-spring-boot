@@ -42,8 +42,8 @@ public class WechatV2Client {
         WechatPayProperties.V3 v3 = wechatMetaBean.getV3();
         return model
                 .appSecret(v3.getAppSecret())
-                .certPath(v3.getCertPath())
-                .certAbsolutePath(v3.getCertAbsolutePath())
+                .certPath(v3.getCertificate())
+                .certAbsolutePath(v3.getPrivateKey())
                 .request(v3.getMchId(), method, url);
     }
 

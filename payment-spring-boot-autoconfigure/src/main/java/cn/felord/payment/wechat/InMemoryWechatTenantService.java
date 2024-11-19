@@ -20,11 +20,7 @@ package cn.felord.payment.wechat;
 import cn.felord.payment.wechat.v3.KeyPairFactory;
 import cn.felord.payment.wechat.v3.WechatMetaBean;
 import lombok.AllArgsConstructor;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ResourceUtils;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -40,7 +36,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class InMemoryWechatTenantService implements WechatTenantService {
     private final WechatPayProperties wechatPayProperties;
-    private final ResourceLoader resourceLoader;
     private final Set<WechatMetaBean> cache = new HashSet<>();
 
     @Override
@@ -53,13 +48,17 @@ public class InMemoryWechatTenantService implements WechatTenantService {
                     .map(entry -> {
                         WechatPayProperties.V3 v3 = entry.getValue();
                         String tenantId = entry.getKey();
-                        String certPath = v3.getCertPath();
-                        String certAbsolutePath = v3.getCertAbsolutePath();
+                        String certificate = v3.getCertificate();
+                        String privateKey = v3.getPrivateKey();
                         String mchId = v3.getMchId();
-                        Resource resource = certAbsolutePath != null ? new FileSystemResource(certAbsolutePath) :
+
+                        //
+//                        Resource resource = new ByteArrayResource(certPath.getBytes());
+
+                   /*     Resource resource = certAbsolutePath != null ? new FileSystemResource(certAbsolutePath) :
                                 resourceLoader.getResource(certPath == null ? "classpath:wechat/apiclient_cert.p12" :
-                                        certPath.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX) ? certPath : ResourceUtils.CLASSPATH_URL_PREFIX + certPath);
-                        WechatMetaBean wechatMetaBean = keyPairFactory.initWechatMetaBean(resource, mchId);
+                                        certPath.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX) ? certPath : ResourceUtils.CLASSPATH_URL_PREFIX + certPath);*/
+                        WechatMetaBean wechatMetaBean = keyPairFactory.initWechatMetaBean(certificate, privateKey, mchId);
                         wechatMetaBean.setV3(v3);
                         wechatMetaBean.setTenantId(tenantId);
                         return wechatMetaBean;
